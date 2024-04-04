@@ -25,11 +25,14 @@ public class BookService {
         return bookRepository.findAll();
     }
 
+    @Cacheable(cacheNames = AppCacheProperties.CacheNames.DATABASE_BOOK_BY_ID,
+            key = "#id")
     public Book findById(Integer id) {
         return bookRepository.findById(id).orElseThrow();
     }
 
-    @Cacheable(cacheNames = AppCacheProperties.CacheNames.DATABASE_BOOK_BY_TITLE_AND_AUTHOR, key = "#title + #author")
+    @Cacheable(cacheNames = AppCacheProperties.CacheNames.DATABASE_BOOK_BY_TITLE_AND_AUTHOR,
+            key = "#title + #author")
     public Book findByTitleAndAuthor(String title, String author) {
         List<Book> books = findAll();
 
@@ -42,7 +45,8 @@ public class BookService {
         return null;
     }
 
-    @Cacheable(cacheNames = AppCacheProperties.CacheNames.DATABASE_ENTITY_BY_CATEGORY, key = "#categoryTitle")
+    @Cacheable(cacheNames = AppCacheProperties.CacheNames.DATABASE_BOOK_BY_CATEGORY,
+            key = "#categoryTitle")
     public List<Book> findAllByCategoryTitle(String categoryTitle) {
         List<Book> books = findAll();
         List<Book> returnBooks = new ArrayList<>();
@@ -57,8 +61,12 @@ public class BookService {
     }
 
     @Caching(evict = {
-            @CacheEvict(value = AppCacheProperties.CacheNames.DATABASE_ENTITY_BY_CATEGORY, allEntries = true),
-            @CacheEvict(value = AppCacheProperties.CacheNames.DATABASE_BOOK_BY_TITLE_AND_AUTHOR, allEntries = true)
+            @CacheEvict(cacheNames = AppCacheProperties.CacheNames.DATABASE_BOOK_BY_CATEGORY,
+                    allEntries = true),
+            @CacheEvict(cacheNames = AppCacheProperties.CacheNames.DATABASE_BOOK_BY_TITLE_AND_AUTHOR,
+                    allEntries = true),
+            @CacheEvict(cacheNames = AppCacheProperties.CacheNames.DATABASE_BOOK_BY_ID,
+                    allEntries = true)
     })
     public Book create(Book book, String categoryTitle) {
         String categoryName = categoryTitle.trim().toLowerCase();
@@ -83,8 +91,12 @@ public class BookService {
     }
 
     @Caching(evict = {
-            @CacheEvict(value = AppCacheProperties.CacheNames.DATABASE_ENTITY_BY_CATEGORY, allEntries = true),
-            @CacheEvict(value = AppCacheProperties.CacheNames.DATABASE_BOOK_BY_TITLE_AND_AUTHOR, allEntries = true)
+            @CacheEvict(cacheNames = AppCacheProperties.CacheNames.DATABASE_BOOK_BY_CATEGORY,
+                    key = "#book.getCategory().getTitle()", beforeInvocation = true),
+            @CacheEvict(cacheNames = AppCacheProperties.CacheNames.DATABASE_BOOK_BY_TITLE_AND_AUTHOR,
+                    key = "#book.getTitle() + #book.getAuthor()", beforeInvocation = true),
+            @CacheEvict(cacheNames = AppCacheProperties.CacheNames.DATABASE_BOOK_BY_ID,
+                    key = "#book.getId()", beforeInvocation = true)
     })
     public Book update(Book book) {
         String categoryTitle = book.getCategory().getTitle();
@@ -115,8 +127,12 @@ public class BookService {
     }
 
     @Caching(evict = {
-            @CacheEvict(value = AppCacheProperties.CacheNames.DATABASE_ENTITY_BY_CATEGORY, allEntries = true),
-            @CacheEvict(value = AppCacheProperties.CacheNames.DATABASE_BOOK_BY_TITLE_AND_AUTHOR, allEntries = true)
+            @CacheEvict(cacheNames = AppCacheProperties.CacheNames.DATABASE_BOOK_BY_CATEGORY,
+                    key = "@bookController.findById(#id).body.categoryTitle"),
+            @CacheEvict(cacheNames = AppCacheProperties.CacheNames.DATABASE_BOOK_BY_TITLE_AND_AUTHOR,
+                    key = "@bookController.findById(#id).body.title + @bookController.findById(#id).body.author"),
+            @CacheEvict(cacheNames = AppCacheProperties.CacheNames.DATABASE_BOOK_BY_ID,
+                    key = "#id")
     })
     public void deleteById(Integer id) {
         bookRepository.deleteById(id);

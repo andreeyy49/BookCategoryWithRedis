@@ -18,8 +18,11 @@ app:
     cache-names:
       - databaseBookByTitleAndAuthor
       - databaseBookByCategory
+      - databaseBookById
     caches:
       databaseBookByTitleAndAuthor:
         expire: 10m
       databaseBookByCategory:
+        expire: 10m
+      databaseBookById:
         expire: 10m

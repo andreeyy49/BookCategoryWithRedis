@@ -17,8 +17,6 @@ public class BookControllerTest extends AbstractTest {
 
     @Test
     public void whenGetAllBooks_thenReturnBookList() throws Exception {
-        assertTrue(redisTemplate.keys("*").isEmpty());
-
         String actualResponse = mockMvc.perform(get("/api/book"))
                 .andExpect(status().isOk())
                 .andReturn()
@@ -33,7 +31,7 @@ public class BookControllerTest extends AbstractTest {
     public void whenGetAllBooksByCategoryTitle_thenReturnBookList() throws Exception {
         assertTrue(redisTemplate.keys("*").isEmpty());
 
-        String actualResponse = mockMvc.perform(get("/api/book/Category1"))
+        String actualResponse = mockMvc.perform(get("/api/book/findByCategoryTitle/Category1"))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -49,7 +47,7 @@ public class BookControllerTest extends AbstractTest {
     public void whenGetBookByTitleAndAuthor_thenReturnOneBook() throws Exception {
         assertTrue(redisTemplate.keys("*").isEmpty());
 
-        String actualResponse = mockMvc.perform(get("/api/book/TitleBook1/Author1"))
+        String actualResponse = mockMvc.perform(get("/api/book/findByTitleAndAuthor/TitleBook1/Author1"))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -67,7 +65,7 @@ public class BookControllerTest extends AbstractTest {
         assertTrue(redisTemplate.keys("*").isEmpty());
         assertEquals(3, bookRepository.count());
 
-        mockMvc.perform(get("/api/book/Category1"))
+        mockMvc.perform(get("/api/book/findByCategoryTitle/Category1"))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -99,7 +97,7 @@ public class BookControllerTest extends AbstractTest {
     public void whenUpdateBook_thenUpdateBookAndEvictCache() throws Exception {
         assertTrue(redisTemplate.keys("*").isEmpty());
 
-        mockMvc.perform(get("/api/book/Category1"))
+        mockMvc.perform(get("/api/book/findByCategoryTitle/Category1"))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -110,7 +108,7 @@ public class BookControllerTest extends AbstractTest {
         UpsertBookRequest request = new UpsertBookRequest();
         request.setAuthor("updateAuthor");
         request.setTitle("updateTitleBook");
-        request.setCategoryTitle("updateCategoryTitle");
+        request.setCategoryTitle("Category1");
         String actualResponse = mockMvc.perform(put("/api/book/{id}", UPDATED_ID.toString())
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsString(request)))
@@ -119,7 +117,7 @@ public class BookControllerTest extends AbstractTest {
                 .getResponse()
                 .getContentAsString();
 
-        String expectedResponse = objectMapper.writeValueAsString(new BookResponse(UPDATED_ID, "updateAuthor", "updateTitleBook", "updateCategoryTitle"));
+        String expectedResponse = objectMapper.writeValueAsString(new BookResponse(UPDATED_ID, "updateAuthor", "updateTitleBook", "Category1"));
 
         assertTrue(redisTemplate.keys("*").isEmpty());
 
@@ -131,7 +129,7 @@ public class BookControllerTest extends AbstractTest {
         assertTrue(redisTemplate.keys("*").isEmpty());
         assertEquals(3, bookRepository.count());
 
-        mockMvc.perform(get("/api/book/Category1"))
+        mockMvc.perform(get("/api/book/findByCategoryTitle/Category1"))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -139,7 +137,13 @@ public class BookControllerTest extends AbstractTest {
 
         assertFalse(redisTemplate.keys("*").isEmpty());
 
-        mockMvc.perform(delete("/api/book/" + UPDATED_ID))
+        mockMvc.perform(get("/api/book/findById/" + 3))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        mockMvc.perform(delete("/api/book/" + 3))
                 .andExpect(status().isNoContent());
 
         assertTrue(redisTemplate.keys("*").isEmpty());

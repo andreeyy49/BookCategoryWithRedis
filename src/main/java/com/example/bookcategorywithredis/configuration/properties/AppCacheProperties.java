@@ -24,6 +24,7 @@ public class AppCacheProperties {
 
     public interface CacheNames {
         String DATABASE_BOOK_BY_TITLE_AND_AUTHOR = "databaseBookByTitleAndAuthor";
-        String DATABASE_ENTITY_BY_CATEGORY = "databaseBookByCategory";
+        String DATABASE_BOOK_BY_CATEGORY = "databaseBookByCategory";
+        String DATABASE_BOOK_BY_ID = "databaseBookById";
     }
 }

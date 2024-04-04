@@ -44,7 +44,7 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 @Testcontainers
 public class AbstractTest {
 
-    public static final Integer UPDATED_ID = 3;
+    public static final Integer UPDATED_ID = 4;
 
     @Autowired
     protected MockMvc mockMvc;
@@ -124,10 +124,18 @@ public class AbstractTest {
 
         BookResponse findByTitleAndAuthorResponseBody = new BookResponse(1, "FirstAuthor", "FirstTitleBook", "FirstCategory");
 
-        wireMockServer.stubFor(WireMock.get("/api/book/" + findByTitleAndAuthorResponseBody.getTitle() + "/" + findByTitleAndAuthorResponseBody.getAuthor())
+        wireMockServer.stubFor(WireMock.get("/api/book/findByTitleAndAuthor/" + findByTitleAndAuthorResponseBody.getTitle() + "/" + findByTitleAndAuthorResponseBody.getAuthor())
                 .willReturn(aResponse()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                         .withBody(objectMapper.writeValueAsString(findByTitleAndAuthorResponseBody))
+                        .withStatus(200)));
+
+        BookResponse findByIdResponseBody = new BookResponse(1, "FirstAuthor", "FirstTitleBook", "FirstCategory");
+
+        wireMockServer.stubFor(WireMock.get("/api/book/findById/" + 1)
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(objectMapper.writeValueAsString(findByIdResponseBody))
                         .withStatus(200)));
 
         List<BookResponse> findAllByCategoryTitleResponseBody = new ArrayList<>();
@@ -135,7 +143,7 @@ public class AbstractTest {
         findAllByCategoryTitleResponseBody.add(new BookResponse(1, "FirstAuthor", "FirstTitleBook", "FirstCategory"));
         findAllByCategoryTitleResponseBody.add(new BookResponse(2, "SecondAuthor", "SecondTitleBook", "FirstCategory"));
 
-        wireMockServer.stubFor(WireMock.get("/api/book/" + findAllByCategoryTitleResponseBody.get(1).getCategoryTitle())
+        wireMockServer.stubFor(WireMock.get("/api/book/findByCategoryTitle/" + findAllByCategoryTitleResponseBody.get(1).getCategoryTitle())
                 .willReturn(aResponse()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                         .withBody(objectMapper.writeValueAsString(findAllByCategoryTitleResponseBody))
@@ -160,14 +168,14 @@ public class AbstractTest {
         upsertRequest.setCategoryTitle("updateCategoryTitle");
         BookResponse updatedResponseBody = new BookResponse(1, "updateAuthor", "updateTitleBook", "updateCategory");
 
-        wireMockServer.stubFor(WireMock.put("/api/book" + UPDATED_ID)
+        wireMockServer.stubFor(WireMock.put("/api/book/" + UPDATED_ID)
                 .withRequestBody(equalToJson(objectMapper.writeValueAsString(upsertRequest)))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                         .withBody(objectMapper.writeValueAsString(updatedResponseBody))
                         .withStatus(200)));
 
-        wireMockServer.stubFor(WireMock.delete("/api/v1/entity/" + UPDATED_ID)
+        wireMockServer.stubFor(WireMock.delete("/api/book/" + UPDATED_ID)
                 .willReturn(aResponse().withStatus(204)));
     }
 }

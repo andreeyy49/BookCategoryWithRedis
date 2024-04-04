@@ -26,14 +26,19 @@ public class BookController {
         return ResponseEntity.ok(bookService.findAll().stream().map(bookMapper::bookToResponse).toList());
     }
 
-    @GetMapping("/{title}/{author}")
-    public ResponseEntity<BookResponse> findByNameAndAuthor(@PathVariable String title, @PathVariable String author) {
+    @GetMapping("/findById/{id}")
+    public ResponseEntity<BookResponse> findById(@PathVariable Integer id){
+        return ResponseEntity.ok(bookMapper.bookToResponse(bookService.findById(id)));
+    }
+
+    @GetMapping("/findByTitleAndAuthor/{title}/{author}")
+    public ResponseEntity<BookResponse> findByTitleAndAuthor(@PathVariable String title, @PathVariable String author) {
         return ResponseEntity.ok(bookMapper.bookToResponse(
                 bookService.findByTitleAndAuthor(title, author)
         ));
     }
 
-    @GetMapping("/{categoryTitle}")
+    @GetMapping("/findByCategoryTitle/{categoryTitle}")
     public ResponseEntity<List<BookResponse>> findByCategoryTitle(@PathVariable String categoryTitle) {
         return ResponseEntity.ok(bookService.findAllByCategoryTitle(categoryTitle).stream().map(bookMapper::bookToResponse).toList());
     }
